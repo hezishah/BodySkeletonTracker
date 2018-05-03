@@ -11,6 +11,9 @@
 
 #include "DrawAux.h"
 
+#include "osc/OscOutboundPacketStream.h"
+#include "ip/UdpSocket.h"
+
 using namespace cv;
 using namespace std;
 
@@ -398,6 +401,28 @@ printf("w x h = %d x %d\n", width, height);
 
 
 void SampleViewer::notifyListeners(SkeletonPoints * sp, int afa, Point3D *closest, Mat &frame) {
+    //UdpTransmitSocket transmitSocket( IpEndpointName( "172.18.38.197", 7000 ) );
+    UdpTransmitSocket transmitSocket( IpEndpointName( "127.0.0.1", 7000 ) );
+    
+    char buffer[0x100];
+    osc::OutboundPacketStream p( buffer, 0x100 );
+    
+    p << osc::BeginBundleImmediate
+        << osc::BeginMessage( "/close" ) 
+            << (float)(closest->z) << osc::EndMessage
+        << osc::BeginMessage( "/headz" ) 
+            << (float)(sp->head.z) << osc::EndMessage
+		<< osc::BeginMessage("/handleft")
+		    << (float)(sp->leftHand.z) << osc::EndMessage
+		<< osc::BeginMessage("/handright")
+		    << (float)(sp->rightHand.z) << osc::EndMessage
+		<< osc::BeginMessage("/shoulderleft")
+		    << (float)(sp->leftShoulder.z) << osc::EndMessage
+		<< osc::BeginMessage("/shoulderright")	
+		    << (float)(sp->rightShoulder.z) << osc::EndMessage
+        << osc::EndBundle;
+    
+    transmitSocket.Send( p.Data(), p.Size() );
 	//printf("CLOSE=%6d :: head.z=%6d  left/rightHand=%6d::%6d::ombros=%6d::%6d\n", closest->z, sp->head.z, sp->leftHand.z, sp->rightHand.z, sp->leftShoulder.z, sp->rightShoulder.z);
 	std::vector<cv::Rect> * recs;
 	int i;

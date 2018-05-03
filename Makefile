@@ -4,7 +4,7 @@ BIN_DIR = Bin
 
 INC_DIRS = include
 
-SRC_FILES = src/*.cpp
+SRC_FILES = src/*.cpp ./oscpack/osc/*.cpp ./oscpack/ip/*.cpp ./oscpack/ip/posix/*.cpp
 
 ifeq ("$(OSTYPE)","Darwin")
 	CFLAGS += -DMACOS
@@ -17,7 +17,7 @@ endif
 USED_LIBS += OpenNI2
 
 #if DEPTH camera like Orbbec Astra, or Asus Xtion add this flag DEPTH. If not comment the following line
-CFLAGS += -DDEPTH
+CFLAGS += -DDEPTH -Wno-unused-result
 
 #compile executable
 EXE_NAME = BodySkeletonTracker
@@ -37,6 +37,7 @@ else ifndef OPENNI2_REDIST
 endif
 
 INC_DIRS += $(OPENNI2_INCLUDE)
+INC_DIRS += ./oscpack
 
 include CommonCppMakefile
 
